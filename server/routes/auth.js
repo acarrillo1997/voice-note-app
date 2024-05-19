@@ -34,13 +34,21 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
+  console.log('Login request received for email:', email);
+
   // Check if email exists
   const user = await User.findOne({ where: { email } });
-  if (!user) return res.status(400).send('Email or password is wrong');
+  if (!user) {
+    console.log('Email not found');
+    return res.status(400).send('Email or password is wrong');
+  }
 
   // Check password
   const validPass = await bcrypt.compare(password, user.password);
-  if (!validPass) return res.status(400).send('Invalid password');
+  if (!validPass) {
+    console.log('Invalid password');
+    return res.status(400).send('Invalid password');
+  }
 
   // Create and assign a token
   const token = jwt.sign({ id: user.id }, process.env.TOKEN_SECRET);
@@ -48,3 +56,6 @@ router.post('/login', async (req, res) => {
 });
 
 module.exports = router;
+
+console.log('TOKEN_SECRET:', process.env.TOKEN_SECRET);
+
