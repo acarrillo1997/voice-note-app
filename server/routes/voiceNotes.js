@@ -21,11 +21,11 @@ const upload = multer({ storage: storage });
 router.post('/upload', upload.single('voiceNote'), async (req, res) => {
   try {
     const transcription = await transcribeVoiceNote(req.file.path);
-    const businessPlan = await generateBusinessPlan(transcription);
-    await createPage(process.env.NOTION_DATABASE_ID, req.file.filename, transcription, businessPlan);
+    const { businessPlan, businessName } = await generateBusinessPlan(transcription);
+    await createPage(process.env.NOTION_DATABASE_ID, businessName, transcription, businessPlan);
     res.send({ message: 'Voice note uploaded, transcribed, business plan generated, and stored in Notion successfully', transcription, businessPlan });
   } catch (err) {
-    res.status(500).send(err);
+    res.status(500).send(err.message);
   }
 });
 
