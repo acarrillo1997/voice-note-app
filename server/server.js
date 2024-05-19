@@ -16,7 +16,7 @@ app.use('/api/user', authRoute);
 app.use('/api/voiceNotes', voiceNoteRoute);
 
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+  res.send('Hello World! Editing to see if it works');
 });
 
 app.listen(port, () => {
