@@ -21,11 +21,27 @@ const upload = multer({ storage: storage });
 router.post('/upload', upload.single('voiceNote'), async (req, res) => {
   try {
     const transcription = await transcribeVoiceNote(req.file.path);
+    console.log('Transcription:', transcription);
+
     const { businessPlan, businessName } = await generateBusinessPlan(transcription);
-    await createPage(process.env.NOTION_DATABASE_ID, businessName, transcription, businessPlan);
-    res.send({ message: 'Voice note uploaded, transcribed, business plan generated, and stored in Notion successfully', transcription, businessPlan });
+    console.log('Generated Business Plan:', JSON.stringify(businessPlan, null, 2));
+    console.log('Extracted Business Name:', businessName);
+
+    if (!businessName || !businessPlan) {
+      throw new Error('Failed to generate business plan or extract business name');
+    }
+
+    const notionResponse = await createPage(process.env.NOTION_DATABASE_ID, businessName, businessPlan);
+    console.log('Notion page created successfully:', notionResponse);
+
+    res.send({
+      message: 'Voice note uploaded, transcribed, business plan generated, and stored in Notion successfully',
+      transcription,
+      businessPlan
+    });
   } catch (err) {
-    res.status(500).send(err.message);
+    console.error('Error:', err);
+    res.status(500).send({ error: err.message, details: err });
   }
 });
 
